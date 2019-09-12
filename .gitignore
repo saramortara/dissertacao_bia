@@ -10,7 +10,7 @@
 .Rproj.user
 
 # raster and shapefiles
-data/raster
-data/shapefile
+data/raster/
+data/shapefile/
 
 
