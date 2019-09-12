@@ -1,0 +1,29 @@
+Class;Description;ID;is;becomes
+Forest;Forest;1;1;1
+Forest;Natural forest;2;2;1
+Forest;Forest formation;3;3;1
+Forest;Savanna formation;4;4;1
+Forest;Mangrove;5;5;1
+Forest;Forest plantation;9;9;1
+Non forest natural formation;Non forest natural formation;10;10;10
+Non forest natural formation;Wetland;11;11;10
+Non forest natural formation;Grassland formation;12;12;10
+Non forest natural formation;Salt flat;32;32;10
+Non forest natural formation;Other non forest natural formation;13;13;10
+Farming;Farming;14;14;14
+Farming;Pasture;15;15;14
+Farming;Agriculture;18;18;14
+Farming;Annual and perennial crop;19;19;14
+Farming;Semi-perennial crop;20;20;14
+Farming;Mosaic of agriculture and pasture;21;21;14
+Non vegetated area;Non vegetated area;22;22;22
+Non vegetated area;Beach and dune;23;23;22
+Non vegetated area;Urban infraestructure;24;24;22
+Non vegetated area;Rocky outcrop;29;29;22
+Non vegetated area;Mining;30;30;22
+Non vegetated area;Other non vegetated area;25;25;22
+Water bodies;Water bodies;26;26;26
+Water bodies;River, lake, ocean;33;33;26
+Water bodies;Aquiculture;31;31;26
+Water bodies;Non observed;27;27;26
+;;;;
