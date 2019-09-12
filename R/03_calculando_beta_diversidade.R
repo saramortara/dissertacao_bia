@@ -3,6 +3,7 @@
 # carregando os pacotes
 library(betapart)
 library(reshape)
+library(dplyr)
 
 #### 1. lendo os dados ####
 cam_files <- list.files(path="data", pattern="ATLANTIC_CAMTRAPS", 
@@ -48,10 +49,31 @@ str(beta_par)
 # beta.sne = nestedness
 # beta.sor = total (sorensen)
 
-### exportando os dados para quatro planilhas diferentes, arquivos csv separados por virgula
+## exportando os dados para quatro planilhas diferentes, arquivos csv separados por virgula
 dir.create("results/")
 write.table(as.matrix(beta_par$beta.sim), "results/beta_par_turnover.csv", sep=",", col.names=NA)
 write.table(as.matrix(beta_par$beta.sne), "results/beta_par_nestedness.csv", sep=",", col.names=NA)
 write.table(as.matrix(beta_par$beta.sor), "results/beta_par_sorensen_total.csv",  sep=",", col.names=NA)
 write.table(beta_tab, "results/beta_total.csv", sep=",", col.names=NA)
 
+#### 4. calculando beta media e gerando tabela alfa, beta por area ####
+
+colMeans(as.matrix(beta_par$beta.sim))
+
+beta_mean <- lapply(beta_par, function(x) colMeans(as.matrix(x)))
+
+div_df <- bind_rows(beta_mean)
+
+div_df$survey_id <- data_cast$survey_id
+
+head(div_df)
+
+head(area_sp)
+
+div_df$alfa <- rowSums(area_sp)
+
+head(div_df)
+
+write.table(div_df, "results/diversity.csv", 
+            col.names = TRUE, 
+            row.names=FALSE)
