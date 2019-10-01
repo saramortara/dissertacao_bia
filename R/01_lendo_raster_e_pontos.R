@@ -6,6 +6,8 @@ library(raster)
 library(rgdal)
 ## so para plotar
 library(maps) 
+# para %>% 
+library(dplyr)
 
 #### 1. Lendo os dados ####
 
@@ -30,10 +32,10 @@ pt_cam <- SpatialPointsDataFrame(coords = camtrap[,c("X","Y")],
                                  proj4string = CRS("+proj=longlat +datum=WGS84"))
 
 # exportando os dados em formato especial
-dir.create("data/shapefile/pontos_camtrap")
-writeOGR(pt_cam, ".", "./data/shapefile/pontos_camtrap/pontos_camtrap", 
-         driver= "ESRI Shapefile", 
-         overwrite_layer = TRUE)
+#dir.create("data/shapefile/pontos_camtrap")
+# writeOGR(pt_cam, ".", "./data/shapefile/pontos_camtrap/pontos_camtrap", 
+#          driver= "ESRI Shapefile", 
+#          overwrite_layer = TRUE)
 
 #### 2. Criando o buffer #### 
 
@@ -43,20 +45,25 @@ writeOGR(pt_cam, ".", "./data/shapefile/pontos_camtrap/pontos_camtrap",
 a1 <- 900 
 r1 <- sqrt(a1/pi)*1000
 
-
 buf_dist <- r1
-buf_cam <- buffer(pt_cam, width = buf_dist, dissolve = TRUE)
 
-plot(Y ~ X, data=camtrap, pch=".", cex=1.5, las=1)
-map('world','Brazil', add=TRUE)
-plot(buf_cam, add=TRUE, col="green")
+# vamos criar um arquivo espacial para cada comunidade
+buf_cam <- buffer(pt_cam, width = buf_dist, dissolve=FALSE)
 
-head(pt_cam)
+buf_cam
 
+plot(buf_cam)
+
+# changing class to export as shapefile
+buf_polydf <- as(buf_cam, "SpatialPolygonsDataFrame")
+class(buf_polydf)
+
+#dir.create("data/shapefile/buffer_camtrap")
+#writeOGR(buf_polydf, ".", "./data/shapefile/buffer_camtrap/buffer_camtrap", 
+#         driver= "ESRI Shapefile", 
+#         overwrite_layer = TRUE)
 
 #### 3. Extraindo valores do mapbiomas para os buffer
-plot(mb)
-plot(buf_cam, add=TRUE)
 
 mb_cro <- crop(mb, buf_cam)
 mb_crop <- mask(mb_cro, buf_cam)
@@ -73,5 +80,4 @@ mb_new <- reclassify(mb_crop, mb_rcl)
 # exporta o novo raster mapbiomas com as classes simplificadas
 writeRaster(mb_new, filename = "data/raster/mapbiomas_buffer900km2",
              format = "GTiff", overwrite = T)
-
 

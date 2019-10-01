@@ -8,10 +8,19 @@ library(maps)
 
 #### 1. lendo os dados ####
 ## mapbiomas no entorno dos pontos - area 900 km2
-mb_buf <- raster("data/raster/mapbiomas_buffer900km2")
+mb_buf <- raster("data/raster/mapbiomas_buffer900km2.tif")
+
+mb_buf
+
+plot(mb_buf)
 
 ## pontos mamiferos
 pt_cam <- readOGR("data/shapefile/pontos_camtrap/pontos_camtrap.shp")
+
+## buffer pontos
+pt_buf <- readOGR("data/shapefile/buffer_camtrap/buffer_camtrap.shp")
+
+plot(pt_buf)
 
 ## atlas IBGE
 atlas <- readOGR("data/shapefile/AtlasIBGE/AND2018_ct_municipio2013_var130.shp", 
@@ -48,7 +57,6 @@ cam_over$loctn_d <- pt_cam$loctn_d
 cam_over
 
 #### 2. fazendo o merge das localidads com a info de agrotoxico ####
-
 cam_atlas <- merge(pt_cam, cam_over, by="loctn_d")
 dim(cam_atlas)
 
@@ -68,5 +76,8 @@ write.table(cam_atlas_df, "results/02_dados_agrotoxicos.csv",
 # % mata
 # % agricultura
 # % outros
+
+mb_buf
+
 
 
