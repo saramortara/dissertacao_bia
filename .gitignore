@@ -13,4 +13,6 @@
 data/raster/
 data/shapefile/
 
+#zip files
+*.zip
 

@@ -79,7 +79,7 @@ beta_mean <- lapply(beta_par, function(x) colMeans(as.matrix(x)))
 
 # criando data.frame com valores de beta medias
 div_df <- as.data.frame(matrix(unlist(beta_mean), ncol=3, nrow=162, byrow = FALSE))
-
+  
 div_df$survey_id <- rownames(area_sp)
 
 head(div_df)
