@@ -47,8 +47,18 @@ plot(beta.sim ~ farming_intensity, data = dados, las = 1 , bty = "l", main = "Tu
 plot(beta.sne ~ farming_intensity, data = dados, las = 1 , bty = "l", main = "Aninhamento")
 plot(alfa ~ farming_intensity, data = dados, las = 1 , bty = "l", main = "Riqueza")
 
+names(dados)
+###rela??o entre as variaveis
+#par(mfrow = c(1, 3))
+plot(beta.sor ~ prop_farming, data = dados, las = 1 , bty = "l", main = "Total")
+plot(beta.sim ~ prop_farming, data = dados, las = 1 , bty = "l", main = "Turnover")
+plot(beta.sne ~ prop_farming, data = dados, las = 1 , bty = "l", main = "Aninhamento")
+plot(alfa ~ prop_farming, data = dados, las = 1 , bty = "l", main = "Riqueza")
 #par(mfrow = c(1, 1))
 
+names(dados)
+## correlacao entre as variaveis preditoras
+cor(dados[,c('prop_farming', 'prop_forest', 'farming_intensity')])
 
 ###############################
 #### CONSRTU??O DE MODELOS ####
