@@ -16,3 +16,7 @@ data/shapefile/
 #zip files
 *.zip
 
+#doc files
+docs/
+*.doxc
+

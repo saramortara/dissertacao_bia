@@ -3,8 +3,10 @@
 # carregando os pacotes
 library(lme4) # modelos mistos
 library(bbmle) # AICtab
+library(MuMIn) # para R2 de modelos mistos
 library(scales) # para rescalonar variavel effort
 library(ggplot2) # para graficos
+library(ggpubr)
 
 ####criando o diretorio#### BAIXAR NOVOS DOCUMENTOS
 #setwd("C:\\Users\\beatr\\Desktop\\dissertacao_bia-master\\results")
@@ -70,14 +72,17 @@ cor(dados[,c('prop_farming', 'prop_forest', 'farming_intensity')])
 
 head(dados)
 
+# rescalonando a variavel de manejo
 sort(dados$effort)
 dados$effort2 <- rescale(dados$effort)
 
+# removendo os valores na de intensidade de manejo
 dados2 <- dados[!is.na(dados$farming_intensity),]
 dim(dados2)
 
 dim(dados)
 
+# checando se os NA foram embora
 apply(dados, 2, function(x) sum(is.na(x)))
 
 # Modelos para beta total
@@ -115,6 +120,12 @@ h0.3 <- glmer(alfa ~ 1 + (1|location_id),
 
 AICctab(h1.3, h0.3)
 
+#### Calculando o R2 para os modelos mistos ####
+# primeiro entre em ?r.squaredGLMM
+r.squaredGLMM(h1.1)
+
+#### Criando os graficos ####
+
 ### Exemplo de grafico para a riqueza
 
 # criando objetos para auxiliar grafico
@@ -123,110 +134,46 @@ tamt <- 18
 ## tamanho dos pontos
 tamp <- 3
 
-r <- ggplot(dados, aes(x = farming_intensity, y = alfa)) +
-  geom_smooth(method = lm, fill = "grey80", se = TRUE) +
+# grafico riqueza ~ intensidade de manejo
+fig <- ggplot(dados, aes(x = farming_intensity, y = alfa)) +
+  geom_smooth(method = lm, fill = "grey75", se = TRUE) +
   geom_point(shape = 19, size = tamp, alpha = 0.5) + # size=3
-  labs(x = "Intensidade do manejo", y = "Riqueza)") +
+  labs(x = "Intensidade do manejo", y = "Riqueza") +
   #scale_color_manual(values = cor) +
-  theme_classic(base_size = tamt)
+  theme_classic()
 
-r
+# criando figura com 4 paineis para intensidade de manejo
+r1 <- ggarrange(
+  fig %+%  aes(y = beta.sor) + labs(x = "", y = "Beta total") + ggtitle("A"),
+  fig %+%  aes(y = beta.sim) + labs(x = "", y = "Beta substituição") + ggtitle("B"),
+  fig %+%  aes(y = beta.sne) + labs(x = "", y = "Beta aninhamento") + ggtitle("C"),
+  fig + labs(x = "") + ggtitle("D"), 
+  ncol = 4
+)
 
+annotate_figure(r1, bottom = "Intensidade de manejo")
 
+# criando figura com 4 paineis para proporção de mata
+r2 <- ggarrange(
+  fig %+%  aes(x = prop_farming, y = beta.sor) + 
+    labs(x = "", y = "Beta total") + ggtitle("A"),
+  fig %+%  aes(x = prop_farming, y = beta.sim) + 
+    labs(x = "", y = "Beta substituição") + ggtitle("B"),
+  fig %+%  aes(x = prop_farming, y = beta.sne) + 
+    labs(x = "", y = "Beta aninhamento") + ggtitle("C"),
+  fig +  aes(x = prop_farming) +
+    labs(x = "") + ggtitle("D"), 
+  ncol = 4
+)
 
-###### a partir daqui não roda ##########################
-#Hipotese 2 - o tamanho do fragmento, junto com o tipo de matriz, interfere na riqueza de esp?cies
-h2<- glm(riqueza~log(Size)+Vegetation.type, data = floresta, family = 'poisson')
+annotate_figure(r2, bottom = "Proporção de área agrícola")
 
-#Hipotese 3 - nula
-h3<- glm(riqueza~1, data = floresta, family= 'poisson')
+# exportando as figuras
+png("figs/figure01_manejo.png", res = 300, height = 1000, width = 2800)
+annotate_figure(r1, bottom = "Intensidade de manejo")
+dev.off()
 
-##sumario dos modelos
+png("figs/figure02_prop_agricola.png", res = 300, height = 1000, width = 2800)
+annotate_figure(r2, bottom = "Proporção de área agrícola")
+dev.off()
 
-#sumario hipotese 1
-summary(h1)
-
-#sumario hipotese 2
-summary(h2)
-
-#sumario hipotese 3
-summary(h3)
-
-##############################
-#### INSPE??O DE RESIDUOS ####
-##############################
-
-##mudar a conforma??o
-par(mfrow=c(2,2))
-
-#inspes?o de cada modelo - gerando o plot do modelo
-
-#residuos hipotese 1
-plot(h1)
-
-#residuos hipotese 2
-plot(h2)
-
-#residuos hipotese 3
-plot(h3)
-
-##voltando a conforma??o
-par(mfrow=c(1,1))
-
-#######################################
-#### COMPARANDO OS MODELOS COM AIC ####
-#######################################
-
-library(bbmle)
-
-AICtab(h1, h2, h3, weights=TRUE, base=TRUE)
-
-summary(h1)
-
-###############################################
-#### COMPARAR AJUSTE DO MODELO COM GRAFICO ####
-###############################################
-
-##para consiguir identificar onde inicia a sequencia/termina
-range(log(floresta$Size),na.rm = TRUE)
-
-##criar a sequencia para eixo x
-xv<- seq(-2,14, length= 294)
-
-##predict - necessario para ver como seria o modelo e como com os dados reais
-
-##fun??o range - serve para verificar o tamanho da do primeiro numero do eixo x e ultimo
-range(log(floresta$Size),na.rm=TRUE)
-
-##criar um novo data para ser o objeto Size
-data.new <- data.frame(Size=xv)
-
-##fazer a predi??o
-predh1<- predict(h1, newdata=data.new, type="response")
-
-#fun??o length serve para ver variaveis tem ao redor
-length(predh1)
-
-#sumario de predict
-summary(predh1)
-
-#criar um objeto com o expoente de coef de h1, para poder plotar os dados e fazer a curva do modelo
-coefh1<- exp(coef(h1))
-
-##plot dos dados riqueza e tamanho frag (log)
-
-plot(riqueza ~ log(Size), data=floresta, col=floresta$cor,las=1, 
-     xlab="Size(log)", ylab="Riqueza", pch=1, bty= 'l')
-
-##curva do modelo. A fun??o 'curve' ? fun??o, ent?o precisar ter dados
-curve(coefh1[1]+ coefh1[2]*x, add = TRUE)
-
-###incluindo legenda
-legend("topright", c("Ombr?fila", "Semidecidua", "Decidua"), 
-       col=c("darkgreen", "green", "orange"), pch=1)
-
-#retirando pontos de camptrap
-camtrap.novo <- camtrap[c(-2,-3,-6,-9,-10,-11,-17,-19,-24,-25,-27,-29,-42,-43,-58,-62,-80,-81,-83,-86,-92,-94,-105,-107,-108,-139,-141,-144),]
-
-head(camtrap.novo)
-tail(camtrap.novo)
